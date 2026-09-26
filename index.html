@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta name="description" content="Find the calendar events you and a friend have in common. One-time, in your browser, nothing stored.">
+  <meta name="theme-color" content="#5b4bdb">
+  <title>calmatch</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📅</text></svg>">
+  <link rel="stylesheet" href="style.css">
+  <script src="config.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async></script>
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <main>
+    <header>
+      <h1><a href="./">cal<span>match</span></a></h1>
+      <p class="tag">Find the events you and a friend have in common. One-time, in your browser, nothing kept.</p>
+    </header>
+
+    <!-- A: start a comparison -->
+    <section id="view-start" hidden>
+      <div class="card">
+        <h2><span class="step">1</span> Pick a range</h2>
+        <div class="range">
+          <label class="radio"><input type="radio" name="range" value="last" checked>
+            Last <input id="months" type="number" min="1" max="36" value="3" inputmode="numeric"> months</label>
+          <label class="radio"><input type="radio" name="range" value="custom"> Custom dates</label>
+          <div id="custom-range" class="dates" hidden>
+            <label>From <input id="from" type="date"></label>
+            <label>To <input id="to" type="date"></label>
+          </div>
+        </div>
+        <label class="field">Your name <small>(optional — shown to your friend)</small>
+          <input id="name-a" type="text" maxlength="40" autocomplete="given-name" placeholder="e.g. Rachael"></label>
+        <details>
+          <summary>Options</summary>
+          <label class="check"><input id="loose" type="checkbox"> Also count anything at the exact same start time, even with a different name</label>
+          <label class="check"><input id="primary-only-a" type="checkbox"> Only use my main calendar</label>
+        </details>
+      </div>
+
+      <div class="card">
+        <h2><span class="step">2</span> Connect your calendar</h2>
+        <div class="connect" data-who="a"></div>
+      </div>
+
+      <div id="share-a" class="card share" hidden>
+        <h2><span class="step">3</span> Send this link to your friend</h2>
+        <p id="share-a-info" class="muted"></p>
+        <div class="linkbox"><input id="link-a" readonly></div>
+        <div class="row">
+          <button id="share-a-btn" class="primary">Share link</button>
+          <button id="copy-a-btn">Copy</button>
+        </div>
+        <p class="muted small">When they open it and connect their calendar, they'll see your common events and can send a results link back to you.</p>
+      </div>
+    </section>
+
+    <!-- B: respond to an invite -->
+    <section id="view-invite" hidden>
+      <div class="card">
+        <h2 id="invite-title"></h2>
+        <p id="invite-range" class="muted"></p>
+        <label class="field">Your name <small>(optional — shown when you send results back)</small>
+          <input id="name-b" type="text" maxlength="40" autocomplete="given-name"></label>
+        <details>
+          <summary>Options</summary>
+          <label class="check"><input id="primary-only-b" type="checkbox"> Only use my main calendar</label>
+        </details>
+        <div class="connect" data-who="b"></div>
+      </div>
+    </section>
+
+    <!-- Results: shown to B after matching, or to A from a results link -->
+    <section id="view-results" hidden>
+      <div class="card">
+        <h2 id="results-title"></h2>
+        <p id="results-sub" class="muted"></p>
+        <ol id="results-list" class="events"></ol>
+        <div id="results-back" class="row" hidden>
+          <button id="send-back-btn" class="primary">Send results back</button>
+          <button id="copy-back-btn">Copy link</button>
+        </div>
+        <p class="small"><a href="./">Start a new comparison →</a></p>
+      </div>
+    </section>
+
+    <section id="view-error" class="card" hidden>
+      <h2>Hmm.</h2>
+      <p id="error-msg"></p>
+      <p><a href="./">Start over →</a></p>
+    </section>
+
+    <template id="connect-tpl">
+      <button class="google primary" type="button">
+        <svg viewBox="0 0 48 48" width="20" height="20" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+        Connect Google Calendar
+      </button>
+      <label class="ics">or use an <b>.ics</b> file <input type="file" accept=".ics,text/calendar" hidden></label>
+      <p class="status muted small" aria-live="polite"></p>
+    </template>
+
+    <footer>
+      <details>
+        <summary>How is this private?</summary>
+        <ul>
+          <li>There's no server. This is a static page; everything runs in your browser.</li>
+          <li>Google access is read-only, used once, and revoked the moment your events are loaded. Nothing is saved — close the tab and it's gone.</li>
+          <li>The link you send holds only the date range and short scrambled fingerprints of your events — no titles, times, or details. It sits after the <code>#</code>, which browsers never send to any server.</li>
+          <li>Your friend's browser fingerprints their own events the same way and compares. Only events you <em>both</em> have can show up.</li>
+          <li>Fair warning: someone holding your link could test guesses ("was there an event called <em>Dentist</em> at 3pm on the 4th?"). Only send it to the person you're comparing with.</li>
+        </ul>
+      </details>
+      <p class="small muted"><a href="https://github.com/rachael/calmatch">source</a></p>
+    </footer>
+  </main>
+</body>
+</html>
