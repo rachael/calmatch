@@ -36,7 +36,7 @@ The site needs a Google OAuth client ID. It is public and safe to commit.
    - **Data access / Scopes** → add `https://www.googleapis.com/auth/calendar.readonly`.
    - **Audience → Test users** → add your Google account **and your friend's**. The app can stay in "Testing" mode forever for up to 100 test users. People will see a "Google hasn't verified this app" screen: tap *Continue*.
 4. **Clients / Credentials → Create OAuth client ID** → type **Web application**.
-   - **Authorized JavaScript origins**: `https://rachael.github.io`. Add `http://localhost:8000` too if you want to test locally.
+   - **Authorized JavaScript origins**: `https://rachael.github.io`. Add `http://localhost:8765` too if you want to test locally.
    - No redirect URIs are needed.
 5. Paste the client ID into [`config.js`](config.js) and push.
 
@@ -47,8 +47,9 @@ Repo **Settings → Pages** → Source: *Deploy from a branch* → `main` / `(ro
 ## Local dev
 
 ```sh
-python3 -m http.server 8000    # then open http://localhost:8000
-node --test test/*.test.mjs    # unit tests for the matching/link logic
+python3 -m http.server 8765    # then open http://localhost:8765
+npm test                       # unit tests for the matching/link logic
+npm run e2e                    # browser test with a fake Google (needs the server above on :8765 + playwright)
 ```
 
 Files: `index.html` (markup), `style.css`, `app.js` (UI + Google), `core.js` (fingerprints, link encoding, .ics parser; no DOM), `config.js`.
